@@ -1,118 +1,94 @@
-"""Anjani main entry point"""
-# Copyright (C) 2020 - 2023  UserbotIndo Team, <https://github.com/userbotindo.git>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# ✨ Anime Themed Main Plugin ✨
 
-import asyncio
-import logging
-import os
-import sys
-from pathlib import Path
-from typing import Any, MutableMapping
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from anjani import plugin, command, filters, util
+from pyrogram.enums.chat_type import ChatType
+from pyrogram.enums.parse_mode import ParseMode
 
-import aiorun
-import colorlog
-import dotenv
+class Main(plugin.Plugin):
+    name = "Main"
 
-from . import DEFAULT_CONFIG_PATH
-from .core import Anjani
-from .util.config import Config
+    async def cmd_start(self, ctx: command.Context) -> str | None:
+        chat = ctx.chat
+        if chat.type == ChatType.PRIVATE:
+            if ctx.input == "help":
+                keyboard = await self.help_builder(chat.id)
+                await ctx.respond(
+                    f"🌸 **Welcome, Senpai!**\n\n"
+                    f"✨ I'm your Anime-styled assistant — ready to manage, protect, and entertain!\n"
+                    f"💫 Use the buttons below to explore my powers.",
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                )
+                return
 
-log = logging.getLogger("launch")
+            # Add-to-group / start-help buttons
+            permissions = [
+                "change_info", "post_messages", "edit_messages", "delete_messages",
+                "restrict_members", "invite_users", "pin_messages",
+                "promote_members", "manage_video_chats", "manage_chat"
+            ]
+            buttons = [
+                [
+                    InlineKeyboardButton("🌠 Add Me to Group", url=f"t.me/{self.bot.user.username}?startgroup=true&admin={'+'.join(permissions)}"),
+                    InlineKeyboardButton("📖 Help Menu", url=f"t.me/{self.bot.user.username}?start=help"),
+                ]
+            ]
 
+            await ctx.respond(
+                f"👋 Kon'nichiwa, **{self.bot.user.first_name}** desu~!\n"
+                f"I'm here to help with **moderation, info, and fun**.\n\n"
+                f"🎌 Use /help to see all my commands.\n"
+                f"💮 Powered by *Anjani Management Bot*.",
+                reply_markup=InlineKeyboardMarkup(buttons),
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN,
+            )
+            return None
 
-def _level_check(level: str) -> int:
-    _str_to_lvl = {
-        "CRITICAL": logging.CRITICAL,
-        "ERROR": logging.ERROR,
-        "WARNING": logging.WARNING,
-        "INFO": logging.INFO,
-        "DEBUG": logging.DEBUG,
-    }
-    if level not in _str_to_lvl:
-        return logging.INFO
+        return "💠 Use me in private for commands, Senpai~!"
 
-    return _str_to_lvl[level]
+    async def cmd_help(self, ctx: command.Context) -> None:
+        chat = ctx.chat
+        if chat.type != ChatType.PRIVATE:
+            await ctx.respond(
+                "🗒️ Use /help in **PM** to see full command list! 🎀",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("📬 Help in PM", url=f"t.me/{self.bot.user.username}?start=help")]
+                ])
+            )
+            return
 
-
-def _setup_log() -> None:
-    """Configures logging"""
-    level = _level_check(os.environ.get("LOG_LEVEL", "info").upper())
-    logging.root.setLevel(level)
-
-    # Color log config
-    log_color: bool = os.environ.get("LOG_COLOR") in {"enable", 1, "1", "true"}
-
-    file_format = "[ %(asctime)s: %(levelname)-8s ] %(name)-15s - %(message)s"
-    logfile = logging.FileHandler("Anjani.log")
-    formatter = logging.Formatter(file_format, datefmt="%H:%M:%S")
-    logfile.setFormatter(formatter)
-    logfile.setLevel(level)
-
-    if log_color:
-        formatter = colorlog.ColoredFormatter(
-            "  %(log_color)s%(levelname)-8s%(reset)s  |  "
-            "%(name)-15s  |  %(log_color)s%(message)s%(reset)s"
+        keyboard = await self.help_builder(chat.id)
+        await ctx.respond(
+            "🌟 Choose your destiny!\nPick a plugin below to see its commands 🔮",
+            reply_markup=InlineKeyboardMarkup(keyboard)
         )
-    else:
-        formatter = logging.Formatter("  %(levelname)-8s  |  %(name)-15s  |  %(message)s")
-    stream = logging.StreamHandler()
-    stream.setLevel(level)
-    stream.setFormatter(formatter)
 
-    root = logging.getLogger()
-    root.setLevel(level)
-    root.addHandler(stream)
-    root.addHandler(logfile)
+    async def cmd_donate(self, ctx: command.Context) -> None:
+        await ctx.respond(
+            "🌸 Want to support my creators?\nYour kindness keeps this bot running smoothly 💖",
+            disable_web_page_preview=True,
+        )
 
-    # Logging necessary for selected libs
-    aiorun.logger.disabled = True
-    logging.getLogger("pymongo").setLevel(logging.WARNING)
-    logging.getLogger("pyrogram").setLevel(logging.ERROR)
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    async def cmd_privacy(self, ctx: command.Context) -> None:
+        await ctx.respond(
+            "🔐 Privacy is our top priority!\nRead the full policy below:",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔍 Privacy Policy", url="https://userbotindo.com/privacy")]
+            ])
+        )
 
+    async def cmd_markdownhelp(self, ctx: command.Context) -> None:
+        await ctx.respond(
+            "📘 *Markdown* lets you format your messages like a pro!\n"
+            "`**bold**`, `__italic__`, `~~strike~~`, and more~",
+            parse_mode=ParseMode.MARKDOWN,
+        )
 
-def start() -> None:
-    """Main entry point for the bot."""
-    config_path = Path(DEFAULT_CONFIG_PATH)
-    if config_path.is_file():
-        dotenv.load_dotenv(config_path)
-
-    _setup_log()
-    log.info(
-        "Running on Python %s.%s.%s",
-        sys.version_info.major,
-        sys.version_info.minor,
-        sys.version_info.micro,
-    )
-    log.info("Loading code")
-
-    _uvloop = False
-    if sys.platform == "win32":
-        policy = asyncio.WindowsProactorEventLoopPolicy()
-        asyncio.set_event_loop_policy(policy)
-    else:
-        try:
-            import uvloop  # type: ignore
-        except ImportError:
-            pass
-        else:
-            uvloop.install()
-            _uvloop = True
-            log.info("Using uvloop event loop")
-
-    log.info("Initializing bot")
-    loop = asyncio.new_event_loop()
-
-    aiorun.run(Anjani.init_and_run(Config(), loop=loop), loop=loop if _uvloop else None)
+    @command.filters(aliases=["fillinghelp"])
+    async def cmd_formathelp(self, ctx: command.Context) -> None:
+        await ctx.respond(
+            "📋 Here's the proper format for filling forms:\n\n"
+            "`Field1: Value`\n`Field2: Value`\n\nUse this in commands like `/submit`",
+            parse_mode=ParseMode.MARKDOWN,
+            )
