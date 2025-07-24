@@ -14,8 +14,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from anjani.core.anjani_bot import AnjaniBot
 
+# Logger setup
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - [%(levelname)s] - %(name)s - %(message)s"
+)
+logger = logging.getLogger("Anjani")
+
+def main():
+    logger.info("🚀 Starting Anjani Userbot...")
+    try:
+        app = AnjaniBot()
+        app.run()
+    except Exception as e:
+        logger.error(f"❌ Failed to start AnjaniBot: {e}", exc_info=True)
+
 if __name__ == "__main__":
-    app = AnjaniBot()
-    app.run()
+    main()
