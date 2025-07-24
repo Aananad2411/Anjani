@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from anjani import app  # assuming app is your Client instance
+from anjani.core.anjani_bot import AnjaniBot
 
 if __name__ == "__main__":
+    app = AnjaniBot()
     app.run()
