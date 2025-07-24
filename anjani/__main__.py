@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from anjani import main
+from anjani import app  # assuming app is your Client instance
 
 if __name__ == "__main__":
-    main.start()
+    app.run()
