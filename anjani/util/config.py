@@ -4,7 +4,10 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from anjani import DEFAULT_CONFIG_PATH
+# ⛔ OLD: from anjani import DEFAULT_CONFIG_PATH
+# ✅ FIX:
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DEFAULT_CONFIG_PATH = BASE_DIR / "config.env"
 
 
 class Config:
@@ -67,7 +70,6 @@ class Config:
 
         self.IS_CI = getenv("IS_CI", "false").lower() == "true"
 
-        #  check if all the required variables are set
         if any(
             {
                 not self.API_ID,
@@ -78,7 +80,6 @@ class Config:
         ):
             raise RuntimeError("Required ENV variables are missing!")
 
-        # create download path if not exists
         Path(self.DOWNLOAD_PATH).mkdir(parents=True, exist_ok=True)
 
     def is_plugin_disabled(self, name: str) -> bool:
