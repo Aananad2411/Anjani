@@ -1,11 +1,10 @@
 from typing import Optional
-from pyrogram.enums import ChatType
+from pyrogram.enums import ChatType, ParseMode
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from anjani import command
-from pyrogram.enums import ParseMode
 
 async def cmd_start(self, ctx: command.Context) -> Optional[str]:
-    """Bot start command"""
+    """Bot start command with anime shadow + Anuvibe theme"""
     chat = ctx.chat
 
     if chat.type == ChatType.PRIVATE:
@@ -18,22 +17,22 @@ async def cmd_start(self, ctx: command.Context) -> Optional[str]:
             return None
 
         await ctx.respond_photo(
-            photo="https://graph.org/file/681bb329b240aed64ae78-bde0fa7c1abd4e594d.jpg",
+            photo="https://files.catbox.moe/qr0if2.jpg",
             caption=(
-                "**Hey there!**\n\n"
-                "My name is **Shadow**.\n"
-                "I can manage your group with lots of useful features.\n"
-                "Feel free to add me to your group!"
+                "✨ **Kon'nichiwa, Master!**\n\n"
+                "⚔️ I am **Shadow**, your loyal Anuvibe sentinel.\n"
+                "🎴 Trained in silence, summoned for balance — I moderate with mastery.\n\n"
+                "🌸 Add me to your group and let’s rewrite the clan destiny together."
             ),
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("👑 Owner", url="https://t.me/silent_Shadowzz"),
-                        InlineKeyboardButton("➕ Add to your clan", url=f"https://t.me/{self.bot.user.username}?startgroup=true"),
+                        InlineKeyboardButton("👑 Anuvibe", url="https://t.me/Anuvibe"),
+                        InlineKeyboardButton("➕ Summon to Clan", url=f"https://t.me/{self.bot.user.username}?startgroup=true"),
                     ],
                     [
                         InlineKeyboardButton("📚 Help", url=f"https://t.me/{self.bot.user.username}?start=help"),
-                        InlineKeyboardButton("🛠 Support", url="https://t.me/Inside_ShadowzMind"),
+                        InlineKeyboardButton("🛠 Support", url="https://t.me/Anuvibe"),
                     ],
                 ]
             ),
