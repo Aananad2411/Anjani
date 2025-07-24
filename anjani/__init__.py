@@ -1,4 +1,3 @@
-"""Anjani init"""
-from .core.anjani_bot import AnjaniBot
+"""Anjani - Anime Management Bot"""
 
-app = AnjaniBot()
+__version__ = "1.0.0"
